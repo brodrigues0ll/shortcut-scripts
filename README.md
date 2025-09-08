@@ -17,7 +17,7 @@ Verifica se sites populares de streaming, redes sociais e música estão acessí
 
 2. **Execute o comando abaixo:**
    ```powershell
-   https://raw.githubusercontent.com/brodrigues0ll/shortcut-scripts/refs/heads/main/test-sites-bloqueados
+   irm "https://raw.githubusercontent.com/brodrigues0ll/shortcut-scripts/refs/heads/main/test-sites-bloqueados" | iex
 
 ---
 
