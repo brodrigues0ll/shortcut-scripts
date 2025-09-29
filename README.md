@@ -32,7 +32,11 @@
 
 </details>
 
+
+
 ---
+
+
 
 ### 🔒 Bloqueio de Aplicativos por SRP
 **Descrição**: Aplica regras de **Software Restriction Policies (SRP)** para bloquear tipos de arquivo e pastas específicas, aumentando a segurança do sistema.
