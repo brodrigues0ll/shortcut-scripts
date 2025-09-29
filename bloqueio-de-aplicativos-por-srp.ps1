@@ -1,5 +1,4 @@
-# Evita problemas de execução, definindo a política apenas para o processo atual
-# Compatível com PowerShell 2.0+; -Scope Process é seguro e não persiste
+# Evita problemas de execução
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop
     Write-Output "Iniciando configuracao de Politicas de Restricao de Software (SRP)..."
@@ -8,17 +7,16 @@ try {
     exit
 }
 
-# Verificar se o script está sendo executado como administrador
-# Usa método compatível com PowerShell 2.0+
+# Verificar se é administrador
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Output "Este script precisa ser executado como Administrador. Execute novamente com privilegios elevados."
+    Write-Output "Este script precisa ser executado como Administrador."
     exit
 }
 
-# Caminho base do SRP no Registro
+# Caminho base
 $srpBase = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers"
 
-# 1. Criar chave principal se não existir
+# Criar chave principal
 if (-not (Test-Path $srpBase)) {
     try {
         New-Item -Path $srpBase -Force -ErrorAction Stop | Out-Null
@@ -31,19 +29,27 @@ if (-not (Test-Path $srpBase)) {
     Write-Output "Diretorio de SRP ja existe"
 }
 
-# 2. Definir "Disallowed" como padrão
+# Definir "Disallowed" como padrão (sem sobrescrever se já existir)
 try {
-    Set-ItemProperty -Path $srpBase -Name "DefaultLevel" -Value 0x00001000 -ErrorAction Stop
-    Set-ItemProperty -Path $srpBase -Name "PolicyScope" -Value 0 -ErrorAction Stop
-    Set-ItemProperty -Path $srpBase -Name "TransparentEnabled" -Value 1 -ErrorAction Stop
-    Set-ItemProperty -Path $srpBase -Name "AuthenticodeEnabled" -Value 0 -ErrorAction Stop
+    if (-not (Get-ItemProperty -Path $srpBase -Name "DefaultLevel" -ErrorAction SilentlyContinue)) {
+        Set-ItemProperty -Path $srpBase -Name "DefaultLevel" -Value 0x00001000
+    }
+    if (-not (Get-ItemProperty -Path $srpBase -Name "PolicyScope" -ErrorAction SilentlyContinue)) {
+        Set-ItemProperty -Path $srpBase -Name "PolicyScope" -Value 0
+    }
+    if (-not (Get-ItemProperty -Path $srpBase -Name "TransparentEnabled" -ErrorAction SilentlyContinue)) {
+        Set-ItemProperty -Path $srpBase -Name "TransparentEnabled" -Value 1
+    }
+    if (-not (Get-ItemProperty -Path $srpBase -Name "AuthenticodeEnabled" -ErrorAction SilentlyContinue)) {
+        Set-ItemProperty -Path $srpBase -Name "AuthenticodeEnabled" -Value 0
+    }
     Write-Output "Padrao definido como 'Nao permitido'"
 } catch {
     Write-Output "Erro ao definir o padrao: ${_}"
     exit
 }
 
-# 3. Criar regras adicionais (pastas permitidas)
+# Regras adicionais
 $additionalRules = @(
     "C:\Windows\",
     "C:\Program Files\",
@@ -55,63 +61,56 @@ $additionalRules = @(
 )
 $rulesPath = "$srpBase\0\Paths"
 if (-not (Test-Path $rulesPath)) {
-    try {
-        New-Item -Path $rulesPath -Force -ErrorAction Stop | Out-Null
-        Write-Output "Diretorio de regras de caminho criado"
-    } catch {
-        Write-Output "Erro ao criar diretorio de regras: ${_}"
-        exit
-    }
+    New-Item -Path $rulesPath -Force | Out-Null
+    Write-Output "Diretorio de regras de caminho criado"
 }
 
-# Criar regras para cada caminho
 $i = 1
 foreach ($path in $additionalRules) {
     $ruleKey = "$rulesPath\{0000000${i}}"
-    try {
-        if (-not (Test-Path $ruleKey)) {
-            New-Item -Path $ruleKey -Force -ErrorAction Stop | Out-Null
+    if (-not (Test-Path $ruleKey)) {
+        try {
+            New-Item -Path $ruleKey -Force | Out-Null
+            Set-ItemProperty -Path $ruleKey -Name "ItemData" -Value $path
+            Set-ItemProperty -Path $ruleKey -Name "SaferFlags" -Value 0
+            Set-ItemProperty -Path $ruleKey -Name "LastModified" -Value ([datetime]::Now.ToFileTimeUtc())
+            Set-ItemProperty -Path $ruleKey -Name "Level" -Value 0x00040000
+            Write-Output "Regra criada: ${path}"
+        } catch {
+            Write-Output "Erro ao criar regra para ${path}: ${_}"
         }
-        Set-ItemProperty -Path $ruleKey -Name "ItemData" -Value $path -ErrorAction Stop
-        Set-ItemProperty -Path $ruleKey -Name "SaferFlags" -Value 0 -ErrorAction Stop
-        Set-ItemProperty -Path $ruleKey -Name "LastModified" -Value ([datetime]::Now.ToFileTimeUtc()) -ErrorAction Stop
-        Set-ItemProperty -Path $ruleKey -Name "Level" -Value 0x00040000 -ErrorAction Stop
-        Write-Output "Regra criada: ${path}"
-    } catch {
-        Write-Output "Erro ao criar regra para ${path}: ${_}"
+    } else {
+        Write-Output "Regra ja existente: ${path}"
     }
     $i++
 }
 
-# 4. Bloquear extensões adicionais
+# Bloquear extensões adicionais (menos .ps1)
 $fileTypesPath = "$srpBase\FileTypes"
 if (-not (Test-Path $fileTypesPath)) {
-    try {
-        New-Item -Path $fileTypesPath -Force -ErrorAction Stop | Out-Null
-        Write-Output "Diretorio de extensoes criado"
-    } catch {
-        Write-Output "Erro ao criar diretorio de extensoes: ${_}"
-        exit
-    }
+    New-Item -Path $fileTypesPath -Force | Out-Null
+    Write-Output "Diretorio de extensoes criado"
 }
-$blockedExtensions = @(".msi", ".msp", ".bat", ".cmd", ".vbs", ".js", ".ps1", ".appinstaller")
+$blockedExtensions = @(".msi", ".msp", ".bat", ".cmd", ".vbs", ".js", ".appinstaller")
 foreach ($ext in $blockedExtensions) {
     $extKey = "$fileTypesPath\${ext}"
-    try {
-        if (-not (Test-Path $extKey)) {
-            New-Item -Path $extKey -Force -ErrorAction Stop | Out-Null
+    if (-not (Test-Path $extKey)) {
+        try {
+            New-Item -Path $extKey -Force | Out-Null
+            Write-Output "Extensao bloqueada: ${ext}"
+        } catch {
+            Write-Output "Erro ao bloquear extensao ${ext}: ${_}"
         }
-        Write-Output "Extensao bloqueada: ${ext}"
-    } catch {
-        Write-Output "Erro ao bloquear extensao ${ext}: ${_}"
+    } else {
+        Write-Output "Extensao ja bloqueada: ${ext}"
     }
 }
 Write-Output "A extensao .LNK nao foi bloqueada para evitar quebra de atalhos"
 
-# 5. Informar que as políticas serão aplicadas após reinicialização
+# Aviso de reinicio
 Write-Output "Politicas configuradas com sucesso! Reinicie o computador para aplicar as alteracoes."
 
-# 6. Pausar no final para ver o log, com compatibilidade para PowerShell 2.0
+# Pausa no final
 if ($PSVersionTable.PSVersion.Major -ge 3) {
     Read-Host -Prompt "Finalizado. Pressione ENTER para sair"
 } else {
