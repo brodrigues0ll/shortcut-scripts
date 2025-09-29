@@ -79,4 +79,51 @@ Atualize as políticas para aplicar as mudanças imediatamente.
    ```powershell
    gpupdate /force; Write-Output "Políticas de grupo atualizadas."
    ```
-3. **Reinício opcional**: Para
+3. **Reinício opcional**: Para aplicar completamente, reinicie o computador. Se quiser reiniciar automaticamente, execute:
+   ```powershell
+   Restart-Computer -Force
+   ```
+
+##### Informações Adicionais
+- O SRP bloqueia arquivos por hash, caminho ou tipo. Ao remover a chave, todos os bloqueios são desativados.
+- As políticas de execução do PowerShell (*ExecutionPolicy*) definem quais scripts podem ser executados. O padrão **RemoteSigned** permite scripts locais, mas exige assinatura para scripts baixados.
+- O reinício garante que serviços e políticas sejam recarregados.
+- Use este procedimento apenas em ambientes confiáveis ou máquinas de teste.
+
+##### Resumo dos Comandos
+```powershell
+# Remove SRP
+Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers" -Recurse -Force
+# Restaurar políticas de execução
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy RemoteSigned -Force
+# Atualizar políticas de grupo
+gpupdate /force
+# Reinício opcional
+Restart-Computer -Force
+```
+
+> **Aviso Final**: A manipulação de políticas pode impactar a segurança. Execute apenas com conhecimento pleno.
+
+</details>
+
+---
+
+## ⚠️ Aviso
+
+- **Use por sua conta e risco**: Sempre revise o código dos scripts antes de executá-los.
+- **Privilégios**: O script de SRP exige execução como administrador.
+- **Backup**: Faça backup do Registro do Windows antes de aplicar mudanças no SRP.
+- **Links**: Os comandos usam URLs encurtadas (Bitly). Verifique o destino final dos links para garantir segurança.
+
+---
+
+## 📜 Licença
+
+Este projeto é distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+<p align="center">
+  Desenvolvido com ❤️ para facilitar sua vida no Windows!
+</p>
