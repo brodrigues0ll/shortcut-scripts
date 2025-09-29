@@ -15,7 +15,7 @@
 ### 🌐 Teste de Sites Bloqueados
 **Descrição**: Verifica rapidamente se sites populares (streaming, redes sociais, música, etc.) estão acessíveis ou bloqueados.
 
-<details>
+<details style={{ marginBottom: '5px' }}>
 <summary><strong>Clique para expandir: Detalhes e instruções</strong></summary>
 
 #### Como usar
