@@ -8,30 +8,15 @@
   Uma coleção de scripts para Windows que automatizam tarefas comuns, testes e verificações rápidas usando PowerShell e Batch.
 </p>
 
-<p align="center">
-  <a href="#instalação">Instalação</a> •
-  <a href="#funcionalidades">Funcionalidades</a> •
-  <a href="#aviso">Aviso</a> •
-  <a href="#licença">Licença</a>
-</p>
-
 ---
 
-## 🚀 Instalação
-
-Os scripts podem ser executados diretamente via PowerShell. Certifique-se de ter permissões administrativas quando necessário e revise o código antes de executar.
-
-1. **Abra o PowerShell como administrador**:
-   - Clique no **Menu Iniciar**, digite `PowerShell` e selecione **Executar como administrador**.
-2. **Execute os comandos fornecidos** nas seções abaixo.
-
----
-
-## 🔧 Funcionalidades
+## 🔧 Scripts Disponíveis
 
 ### 🌐 Teste de Sites Bloqueados
+**Descrição**: Verifica rapidamente se sites populares (streaming, redes sociais, música, etc.) estão acessíveis ou bloqueados.
 
-Verifica rapidamente se sites populares (streaming, redes sociais, música, etc.) estão acessíveis ou bloqueados.
+<details>
+<summary><strong>Clique para expandir: Detalhes e instruções</strong></summary>
 
 #### Como usar
 1. Abra o PowerShell (não precisa de privilégios administrativos para este script).
@@ -45,11 +30,15 @@ Verifica rapidamente se sites populares (streaming, redes sociais, música, etc.
 - **Saída**: Exibe se cada site está acessível ou bloqueado.
 - **Requisitos**: Conexão com a internet.
 
+</details>
+
 ---
 
 ### 🔒 Bloqueio de Aplicativos por SRP
+**Descrição**: Aplica regras de **Software Restriction Policies (SRP)** para bloquear tipos de arquivo e pastas específicas, aumentando a segurança do sistema.
 
-Aplica regras de **Software Restriction Policies (SRP)** para bloquear tipos de arquivo e pastas específicas, aumentando a segurança do sistema.
+<details>
+<summary><strong>Clique para expandir: Detalhes e instruções</strong></summary>
 
 #### Como usar
 1. Abra o PowerShell **como administrador**.
@@ -64,10 +53,6 @@ Aplica regras de **Software Restriction Policies (SRP)** para bloquear tipos de 
 - **Requisitos**: Permissões administrativas.
 
 #### 🔓 Como Desfazer as Regras SRP
-
-<details>
-<summary><strong> Clique para expandir: Instruções para reverter as regras SRP </strong></summary>
-
 Se precisar reverter as políticas de Restrição de Software (SRP), siga este guia passo a passo para restaurar as configurações padrão. Isso remove os bloqueios e restaura a execução normal de arquivos.
 
 ##### PASSO 1: Abrir PowerShell como Administrador
@@ -126,16 +111,26 @@ Restart-Computer -Force
 
 ## ⚠️ Aviso
 
+<details>
+<summary><strong>Clique para expandir: Informações importantes</strong></summary>
+
 - **Use por sua conta e risco**: Sempre revise o código dos scripts antes de executá-los.
 - **Privilégios**: O script de SRP exige execução como administrador.
 - **Backup**: Faça backup do Registro do Windows antes de aplicar mudanças no SRP.
 - **Links**: Os comandos usam URLs encurtadas (Bitly). Verifique o destino final dos links para garantir segurança.
 
+</details>
+
 ---
 
 ## 📜 Licença
 
+<details>
+<summary><strong>Clique para expandir: Detalhes da licença</strong></summary>
+
 Este projeto é distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+</details>
 
 ---
 
